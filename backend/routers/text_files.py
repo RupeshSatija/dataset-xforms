@@ -17,9 +17,16 @@ tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 async def upload_file(file: UploadFile = File(...)):
     content = await file.read()
     text = content.decode()
-    # Use the BERT tokenizer instead of NLTK
+    return {"content": text}
+
+
+@router.post("/tokenize")
+async def tokenize_text(request: dict):
+    text = request.get("text", "")
+    if not text:
+        raise HTTPException(status_code=400, detail="No text provided")
     tokens = tokenizer.tokenize(text)
-    return {"content": text, "tokens": tokens}
+    return {"tokens": tokens}
 
 
 @router.post("/transform")
@@ -30,7 +37,7 @@ async def transform_text(request: dict):
     if not text:
         raise HTTPException(status_code=400, detail="No text provided")
 
-    # Split text into words
+    # Split text into words using whitespace
     words = text.split()
 
     if transformation == "synonyms":
@@ -44,28 +51,17 @@ async def transform_text(request: dict):
             },
         }
     else:
-        # For other transformations, process in chunks
-        chunk_size = 500  # Slightly less than max to be safe
-        tokens = []
-        modifications = []
-
-        for i in range(0, len(text), chunk_size):
-            chunk = text[i : i + chunk_size]
-            chunk_tokens = tokenizer.tokenize(chunk)
-
-            if transformation == "add_spaces":
-                chunk_result = add_spaces(chunk_tokens)
-            elif transformation == "add_punctuation":
-                chunk_result = add_punctuation(chunk_tokens)
-            elif transformation == "noise":
-                chunk_result = add_noise(chunk_tokens)
-
-            tokens.extend(chunk_result["tokens"])
-            modifications.extend(chunk_result["modifications"])
+        # Process other transformations using whitespace tokens
+        if transformation == "add_spaces":
+            result = add_spaces(words)
+        elif transformation == "add_punctuation":
+            result = add_punctuation(words)
+        elif transformation == "noise":
+            result = add_noise(words)
 
         return {
-            "tokens": tokens,
-            "modifications": modifications,
+            "tokens": result["tokens"],
+            "modifications": result["modifications"],
             "type": transformation,
             "colors": {
                 "spaces": "#87CEEB",  # Light blue

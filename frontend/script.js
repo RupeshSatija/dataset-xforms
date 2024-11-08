@@ -14,9 +14,29 @@ document.getElementById('fileInput').addEventListener('change', async (event) =>
         });
         const data = await response.json();
         originalContent = data.content;
-        displayTokenizedText(data.tokens, 'originalText');
+        document.getElementById('rawText').textContent = originalContent;
     } catch (error) {
         console.error('Error uploading file:', error);
+    }
+});
+
+document.getElementById('tokenizeButton').addEventListener('click', async () => {
+    if (!originalContent) return;
+
+    try {
+        const response = await fetch('/api/text/tokenize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: originalContent
+            })
+        });
+        const data = await response.json();
+        displayTokenizedText(data.tokens, 'tokenizedText');
+    } catch (error) {
+        console.error('Error tokenizing text:', error);
     }
 });
 
