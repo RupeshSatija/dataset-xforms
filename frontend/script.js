@@ -34,7 +34,7 @@ document.getElementById('tokenizeButton').addEventListener('click', async () => 
             })
         });
         const data = await response.json();
-        displayTokenizedText(data.tokens, 'tokenizedText');
+        displayTokenizedText(data, 'tokenizedText');
     } catch (error) {
         console.error('Error tokenizing text:', error);
     }
@@ -61,16 +61,96 @@ async function applyTransformation(transformationType) {
     }
 }
 
-function displayTokenizedText(tokens, elementId) {
+function displayTokenizedText(data, elementId) {
     const element = document.getElementById(elementId);
     element.innerHTML = '';
     
-    tokens.forEach(token => {
+    const container = document.createElement('div');
+    container.className = 'tokens-container';
+    container.style.cursor = 'pointer';
+    
+    // Handle both chunked and non-chunked responses
+    const tokens = data.chunks ? data.chunks[0].tokens : data.tokens;
+    const tokenIds = data.chunks ? data.chunks[0].token_ids : null;
+    
+    container.dataset.state = 'tokenized';
+    container.dataset.tokens = JSON.stringify(tokens);
+    if (tokenIds) {
+        container.dataset.tokenIds = JSON.stringify(tokenIds);
+    }
+    
+    tokens.forEach((token, index) => {
         const span = document.createElement('span');
         span.className = 'token';
         span.textContent = token;
-        element.appendChild(span);
+        if (tokenIds) {
+            span.title = `ID: ${tokenIds[index]}`;
+        }
+        
+        container.appendChild(span);
+        
+        // Add space after each token except punctuation
+        if (!/^[,.!?;]$/.test(token)) {
+            container.appendChild(document.createTextNode(' '));
+        }
     });
+    
+    container.addEventListener('click', async () => {
+        const currentState = container.dataset.state;
+        const storedTokens = JSON.parse(container.dataset.tokens);
+        
+        try {
+            if (currentState === 'tokenized') {
+                if (!container.dataset.tokenIds) {
+                    const response = await fetch('/api/text/detokenize', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            tokens: storedTokens
+                        })
+                    });
+                    const data = await response.json();
+                    container.dataset.tokenIds = JSON.stringify(data.token_ids);
+                }
+                
+                const tokenIds = JSON.parse(container.dataset.tokenIds);
+                container.innerHTML = '';
+                tokenIds.forEach((id, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'token-id';
+                    span.textContent = id;
+                    span.title = `Token: ${storedTokens[index]}`;
+                    container.appendChild(span);
+                    
+                    if (!/^[,.!?;]$/.test(storedTokens[index])) {
+                        container.appendChild(document.createTextNode(' '));
+                    }
+                });
+                container.dataset.state = 'ids';
+            } else {
+                container.innerHTML = '';
+                const tokenIds = JSON.parse(container.dataset.tokenIds);
+                storedTokens.forEach((token, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'token';
+                    span.textContent = token;
+                    span.title = `ID: ${tokenIds[index]}`;
+                    container.appendChild(span);
+                    
+                    if (!/^[,.!?;]$/.test(token)) {
+                        container.appendChild(document.createTextNode(' '));
+                    }
+                });
+                container.dataset.state = 'tokenized';
+            }
+        } catch (error) {
+            console.error('Error toggling token display:', error);
+        }
+    });
+    
+    element.appendChild(container);
 }
 
 function displayTransformedText(data) {

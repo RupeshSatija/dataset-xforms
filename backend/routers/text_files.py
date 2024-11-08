@@ -25,8 +25,32 @@ async def tokenize_text(request: dict):
     text = request.get("text", "")
     if not text:
         raise HTTPException(status_code=400, detail="No text provided")
+
+    # Constants
+    max_length = 512
+    overlap = 50  # Overlap between chunks to maintain context
+
+    # Get initial tokens
     tokens = tokenizer.tokenize(text)
-    return {"tokens": tokens}
+    token_ids = tokenizer.convert_tokens_to_ids(tokens)
+
+    # Split into chunks if needed
+    chunks = []
+    if len(tokens) > max_length:
+        for i in range(0, len(tokens), max_length - overlap):
+            chunk_tokens = tokens[i : i + max_length]
+            chunk_ids = token_ids[i : i + max_length]
+            chunks.append(
+                {
+                    "tokens": chunk_tokens,
+                    "token_ids": chunk_ids,
+                    "chunk_index": len(chunks),
+                }
+            )
+    else:
+        chunks.append({"tokens": tokens, "token_ids": token_ids, "chunk_index": 0})
+
+    return {"chunks": chunks, "total_chunks": len(chunks)}
 
 
 @router.post("/transform")
@@ -147,3 +171,20 @@ def add_noise(tokens):
         result.append(token)
         modifications.append(False)
     return {"tokens": result, "modifications": modifications}
+
+
+@router.post("/detokenize")
+async def detokenize_text(request: dict):
+    tokens = request.get("tokens", [])
+    if not tokens:
+        raise HTTPException(status_code=400, detail="No tokens provided")
+
+    # Join tokens with spaces, except for punctuation
+    text = ""
+    for token in tokens:
+        if token in ",.!?;":
+            text = text.rstrip() + token  # Remove trailing space and add punctuation
+        else:
+            text += token + " "
+
+    return {"text": text.strip()}
