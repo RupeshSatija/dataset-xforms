@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Transformer</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Text Transformer</h1>
+        
+        <div class="file-input-section">
+            <input type="file" id="fileInput" accept=".txt,.md,.csv">
+        </div>
+
+        <div class="content-container">
+            <div class="text-box">
+                <h3>Original Text (Tokenized)</h3>
+                <div id="originalText" class="text-content"></div>
+            </div>
+
+            <div class="transformations">
+                <h3>Transformations</h3>
+                <button onclick="applyTransformation('add_spaces')">Add Spaces</button>
+                <button onclick="applyTransformation('add_punctuation')">Add Punctuation</button>
+                <button onclick="applyTransformation('synonyms')">Replace with Synonyms</button>
+                <button onclick="applyTransformation('noise')">Add Noise</button>
+                <!-- Add more transformation buttons as needed -->
+            </div>
+
+            <div class="text-box">
+                <h3>Transformed Text</h3>
+                <div id="transformed-text" style="white-space: pre-wrap; line-height: 1.5;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add a legend -->
+    <div class="legend">
+        <div class="legend-item" style="background-color: #98FB98;">Synonyms</div>
+        <div class="legend-item" style="background-color: #87CEEB;">Added Spaces</div>
+        <div class="legend-item" style="background-color: #FFB6C1;">Added Punctuation</div>
+        <div class="legend-item" style="background-color: #DDA0DD;">Added Noise</div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html> 
