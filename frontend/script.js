@@ -227,12 +227,24 @@ async function applyImageTransformation(transformationType) {
     if (!originalImage) return;
 
     try {
+        // Convert base64 to blob
+        const response = await fetch(originalImage);
+        const blob = await response.blob();
+        
+        // Create FormData and append the file
         const formData = new FormData();
-        const response = await fetch(`/api/image/transform?transformation=${transformationType}`, {
+        formData.append('file', blob, 'image.png');
+
+        const transformResponse = await fetch(`/api/image/transform?transformation=${transformationType}`, {
             method: 'POST',
             body: formData
         });
-        const data = await response.json();
+
+        if (!transformResponse.ok) {
+            throw new Error(`HTTP error! status: ${transformResponse.status}`);
+        }
+
+        const data = await transformResponse.json();
         document.getElementById('transformedImage').src = data.transformed;
     } catch (error) {
         console.error('Error applying image transformation:', error);
