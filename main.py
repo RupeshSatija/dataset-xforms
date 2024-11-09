@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-
-from backend.routers import audio_files, model_files, text_files
+from routers import audio_files, image_files, model_files, text_files
 
 app = FastAPI()
 
@@ -15,10 +13,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Mount routers
 app.include_router(text_files.router, prefix="/api/text")
+app.include_router(image_files.router, prefix="/api/image")
 app.include_router(audio_files.router, prefix="/api/audio")
-app.include_router(model_files.router, prefix="/api/3d")
-
-# Mount static files
-app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
+app.include_router(model_files.router, prefix="/api/model")

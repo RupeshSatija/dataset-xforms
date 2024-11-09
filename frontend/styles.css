@@ -195,3 +195,45 @@
 .token:hover, .token-id:hover {
     background-color: #e2e6ea;
 }
+
+.tab-container {
+    margin: 20px 0;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    margin-right: 5px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.tab-button.active {
+    border-bottom: 2px solid #4CAF50;
+    color: #4CAF50;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.image-box {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.image-content {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    margin: 10px 0;
+}

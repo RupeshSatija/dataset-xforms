@@ -1,43 +1,69 @@
 let originalContent = '';
+let originalImage = null;
 
-document.getElementById('fileInput').addEventListener('change', async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+document.addEventListener('DOMContentLoaded', () => {
+    // Text file input handler
+    document.getElementById('textFileInput').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
+        const formData = new FormData();
+        formData.append('file', file);
 
-    try {
-        const response = await fetch('/api/text/upload', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-        originalContent = data.content;
-        document.getElementById('rawText').textContent = originalContent;
-    } catch (error) {
-        console.error('Error uploading file:', error);
-    }
-});
+        try {
+            const response = await fetch('/api/text/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            originalContent = data.content;
+            document.getElementById('rawText').textContent = originalContent;
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }
+    });
 
-document.getElementById('tokenizeButton').addEventListener('click', async () => {
-    if (!originalContent) return;
+    // Image file input handler
+    document.getElementById('imageFileInput').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    try {
-        const response = await fetch('/api/text/tokenize', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: originalContent
-            })
-        });
-        const data = await response.json();
-        displayTokenizedText(data, 'tokenizedText');
-    } catch (error) {
-        console.error('Error tokenizing text:', error);
-    }
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/image/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            originalImage = data.content;
+            document.getElementById('originalImage').src = originalImage;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+        }
+    });
+
+    // Tokenize button handler
+    document.getElementById('tokenizeButton').addEventListener('click', async () => {
+        if (!originalContent) return;
+
+        try {
+            const response = await fetch('/api/text/tokenize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: originalContent
+                })
+            });
+            const data = await response.json();
+            displayTokenizedText(data, 'tokenizedText');
+        } catch (error) {
+            console.error('Error tokenizing text:', error);
+        }
+    });
 });
 
 async function applyTransformation(transformationType) {
@@ -183,4 +209,32 @@ function displayTransformedText(data) {
         
         container.appendChild(span);
     });
+}
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+    document.getElementById(`${tabName}-section`).classList.add('active');
+}
+
+async function applyImageTransformation(transformationType) {
+    if (!originalImage) return;
+
+    try {
+        const formData = new FormData();
+        const response = await fetch(`/api/image/transform?transformation=${transformationType}`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        document.getElementById('transformedImage').src = data.transformed;
+    } catch (error) {
+        console.error('Error applying image transformation:', error);
+    }
 } 

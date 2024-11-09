@@ -3,42 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Transformer</title>
+    <title>Data Transformer</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Text Transformer</h1>
+        <h1>Data Transformer</h1>
         
-        <div class="file-input-section">
-            <input type="file" id="fileInput" accept=".txt,.md,.csv">
+        <div class="tab-container">
+            <button class="tab-button active" onclick="switchTab('text')">Text</button>
+            <button class="tab-button" onclick="switchTab('image')">Image</button>
         </div>
 
-        <div class="content-container">
-            <div class="text-box">
-                <h3>Original Text</h3>
-                <div id="rawText" class="text-content"></div>
+        <!-- Text Transform Section -->
+        <div id="text-section" class="tab-content active">
+            <div class="file-input-section">
+                <input type="file" id="textFileInput" accept=".txt,.md,.csv">
             </div>
 
-            <button id="tokenizeButton" class="action-button">Tokenize Text</button>
+            <div class="content-container">
+                <div class="text-box">
+                    <h3>Original Text</h3>
+                    <div id="rawText" class="text-content"></div>
+                </div>
 
-            <div class="text-box">
-                <h3>Tokenized Text</h3>
-                <div id="tokenizedText" class="text-content"></div>
+                <button id="tokenizeButton" class="action-button">Tokenize Text</button>
+
+                <div class="text-box">
+                    <h3>Tokenized Text</h3>
+                    <div id="tokenizedText" class="text-content"></div>
+                </div>
+
+                <div class="transformations">
+                    <h3>Transformations</h3>
+                    <button onclick="applyTransformation('add_spaces')">Add Spaces</button>
+                    <button onclick="applyTransformation('add_punctuation')">Add Punctuation</button>
+                    <button onclick="applyTransformation('synonyms')">Replace with Synonyms</button>
+                    <button onclick="applyTransformation('noise')">Add Noise</button>
+                    <!-- Add more transformation buttons as needed -->
+                </div>
+
+                <div class="text-box">
+                    <h3>Transformed Text</h3>
+                    <div id="transformed-text" style="white-space: pre-wrap; line-height: 1.5;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Transform Section -->
+        <div id="image-section" class="tab-content">
+            <div class="file-input-section">
+                <input type="file" id="imageFileInput" accept="image/*">
             </div>
 
-            <div class="transformations">
-                <h3>Transformations</h3>
-                <button onclick="applyTransformation('add_spaces')">Add Spaces</button>
-                <button onclick="applyTransformation('add_punctuation')">Add Punctuation</button>
-                <button onclick="applyTransformation('synonyms')">Replace with Synonyms</button>
-                <button onclick="applyTransformation('noise')">Add Noise</button>
-                <!-- Add more transformation buttons as needed -->
-            </div>
+            <div class="content-container">
+                <div class="image-box">
+                    <h3>Original Image</h3>
+                    <img id="originalImage" class="image-content">
+                </div>
 
-            <div class="text-box">
-                <h3>Transformed Text</h3>
-                <div id="transformed-text" style="white-space: pre-wrap; line-height: 1.5;"></div>
+                <div class="transformations">
+                    <h3>Image Transformations</h3>
+                    <button onclick="applyImageTransformation('resize')">Resize</button>
+                    <button onclick="applyImageTransformation('color_jitter')">Color Adjust</button>
+                    <button onclick="applyImageTransformation('rotate')">Rotate</button>
+                    <button onclick="applyImageTransformation('noise')">Add Noise</button>
+                </div>
+
+                <div class="image-box">
+                    <h3>Transformed Image</h3>
+                    <img id="transformedImage" class="image-content">
+                </div>
             </div>
         </div>
     </div>
